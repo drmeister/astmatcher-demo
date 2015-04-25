@@ -1,0 +1,10 @@
+#S(CXX-CLASS
+   :NAME "Room"
+   :FIELDS (("class Person *" . "people_in_room"))
+   :METHODS (("int" "foo_bar" NIL)
+             ("void" "add_person"
+		     (("class Person" . "person")))))
+#S(CXX-CLASS
+   :NAME "Bag"
+   :FIELDS (("double" . "bar") ("int" . "size"))
+   :METHODS NIL)
