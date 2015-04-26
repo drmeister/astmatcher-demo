@@ -9,8 +9,10 @@
   (format t "---- 1. Parsing C++ source in test.cpp~%")
   (require 'clang-tool)
   (load-compilation-database
-   "/Users/meister/Development/clasp/src/tests/lisp/georgey/compile_commands.json"
+   "compile_commands.json"
    :main-source-filename "test.cpp")
+  (unless (every #'probe-file $*)
+    (error "compile_commands.json contains a file which does not exist; this probably means you haven't updated the directory in compile_commands.json to suit your machine.~%"))
   (load-asts $*))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
