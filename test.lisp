@@ -12,7 +12,7 @@
    "compile_commands.json"
    :main-source-filename "test.cpp")
   (unless (every #'probe-file $*)
-    (error "compile_commands.json contains a file which does not exist; this probably means you haven't updated the directory in compile_commands.json to suit your machine.~%"))
+    (error "compile_commands.json contains a file which does not exist; this probably means you haven't run update.sh (see README.md for more information).~%"))
   (load-asts $*))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
