@@ -53,11 +53,14 @@
     (handler-case (mtag-node tag)
       (no-node-for-tag-error (err) nil)))
 
-  (defun ast-node-typed-decl (node)
-    "Return (cons type name) for a value-decl"
-    (cons (clang-ast:get-as-string
-           (clang-ast:get-type node))
-          (clang-ast:get-name node)))
+  (defun ast-node-typed-decl (node-or-tag)
+    "Return (cons type name) from a value-decl or tag"
+    (let ((node (if (typep node-or-tag 'clang-ast:value-decl)
+                    node-or-tag
+                    (mtag-node node-or-tag))))
+      (cons (clang-ast:get-as-string
+             (clang-ast:get-type node))
+            (clang-ast:get-name node))))
 
   (defmacro sub-match-collect (matcher node &body body)
     (let ((buf (gensym)))
@@ -84,21 +87,20 @@
                       (method-node (mtag-node-or-null :method))
                       (ast-name (mtag-name :whole))
                       (obj (or (gethash ast-name classes)
-                               (setf (gethash ast-name classes)
-                                     (make-cxx-class :name ast-name)))))
-                 (or (format t "Found a match~%")
-                     (and field-node  (format t " field-node: ~a~%" field-node))
-                     (and method-node (format t "method-node: ~a~%" method-node)))
+                               (progn (format t "Matched a new class: ~a~%" ast-name)
+                                      (setf (gethash ast-name classes)
+                                            (make-cxx-class :name ast-name))))))
                  (cond (method-node
+                        (format t "Matched a method-node: ~a~%" method-node)
                         (push (list (clang-ast:get-as-string
                                      (mtag-node :ret-type))
                                     (mtag-name :method)
                                     (sub-match-collect *method-parm-matcher* method-node
-                                                       (ast-node-typed-decl
-                                                        (mtag-node :param))))
+                                                       (ast-node-typed-decl :param)))
                               (cxx-class-methods obj))
                         (format t "Matched parameters~%"))
                        (field-node
+                        (format t "Matched a field-node: ~a~%" field-node)
                         (push (ast-node-typed-decl field-node)
                               (cxx-class-fields obj)))))))
       classes)))
