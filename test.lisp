@@ -80,10 +80,9 @@
 (progn
   (format t "---- 4. Define the search function~%")
   (defun get-classes ()
-    (let ((classes (make-hash-table :test 'equal)))
-      (match-run
-       *matcher*
-       :code (lambda ()
+    (let* ((classes (make-hash-table :test 'equal))
+           (match-cb
+             (lambda ()
                ;; This code is run for each match.
                (let* ((field-node (mtag-node-or-null :field))
                       (method-node (mtag-node-or-null :method))
@@ -105,6 +104,13 @@
                         (format t "Matched a field-node: ~a~%" field-node)
                         (push (ast-node-typed-decl field-node)
                               (cxx-class-fields obj)))))))
+           )
+      ;; API changes are pain
+      #-(or :bclasp :cclasp)(match-run *matcher* :code match-cb)
+      #+(or :bclasp :cclasp)(match-run
+                             *matcher*
+                             :the-code-match-callback
+                             (make-instance 'code-match-callback :match-code match-cb))
       classes)))
 
 
